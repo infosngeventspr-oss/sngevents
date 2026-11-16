@@ -1,0 +1,45 @@
+{
+  "name": "vocacional-crm-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Backend serverless (Cloud Functions + Firestore) para CRM de orientación vocacional con consentimiento parental y matching basado en consentimiento.",
+  "main": "lib/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "jest --runInBand",
+    "test:coverage": "jest --runInBand --coverage",
+    "serve": "npm run build && firebase emulators:start --only functions,firestore",
+    "seed": "ts-node scripts/seed.ts",
+    "dev": "ts-node --transpile-only scripts/dev-server.ts",
+    "deploy": "npm run build && firebase deploy --only functions,firestore:rules,firestore:indexes"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "firebase-admin": "^12.7.0",
+    "firebase-functions": "^6.1.1",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.14",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^20.17.10",
+    "@types/supertest": "^6.0.2",
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  }
+}

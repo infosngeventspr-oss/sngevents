@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EduOrient CRM · Consola de demo</title>
+<style>
+  :root {
+    --navy: #1b2d50; --bg: #eef2f8; --page: #f7f8fa; --card: #ffffff; --tile: #eef2f8; --tile-hover: #e2e9f4;
+    --text: #18243b; --muted: #5d6779; --border: #e3e8f0;
+    --blue: #2f6fe4; --green: #1f9d63; --purple: #7c4ddb; --orange: #e07a10;
+    --ok: #1f7a4d; --err: #b42318; --code-bg: #f4f6fa;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--text); font: 15px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif; }
+  .app { max-width: 960px; margin: 24px auto; background: var(--bg); border-radius: 18px; overflow: hidden; box-shadow: 0 4px 24px rgba(20, 35, 70, .08); }
+  @media (max-width: 1000px) { .app { margin: 0; border-radius: 0; } }
+
+  /* Barra superior */
+  .topbar { background: var(--navy); color: #fff; display: flex; align-items: center; gap: 12px; padding: 16px; }
+  .logo { width: 44px; height: 44px; border-radius: 10px; background: #fff; color: var(--navy); display: grid; place-items: center; flex: none; }
+  .brand b { display: block; font-size: 19px; font-weight: 600; }
+  .brand span { font-size: 14px; opacity: .85; }
+  .top-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .top-actions .session { font-size: 13px; opacity: .85; text-align: right; }
+  .icon-btn { background: none; border: 0; color: #fff; padding: 2px; cursor: pointer; display: grid; }
+
+  .content { padding: 16px; }
+  h1 { font-size: 24px; font-weight: 600; margin: 4px 0 2px; }
+  .subtitle { color: var(--muted); margin: 0 0 14px; font-size: 14px; }
+
+  /* Tarjetas de estadísticas */
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .stat { background: var(--card); border-radius: 12px; padding: 16px; }
+  .stat .num { font-size: 28px; font-weight: 600; margin: 6px 0 2px; }
+  .stat .lbl { color: var(--muted); font-size: 14px; }
+  @media (max-width: 560px) { .stats { grid-template-columns: 1fr; } }
+
+  .card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+  .card h2 { font-size: 19px; font-weight: 600; margin: 0 0 12px; }
+  .card h2 small { font-size: 13px; font-weight: 400; color: var(--muted); margin-left: 6px; }
+
+  /* Rol y módulos */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font: inherit; font-size: 14px; border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+  .chip:hover { border-color: var(--blue); }
+  .chip.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+  .modules { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 560px) { .modules { grid-template-columns: 1fr; } }
+  .module { font: inherit; display: flex; align-items: flex-start; gap: 10px; text-align: left; background: var(--tile); border: 0; border-radius: 8px; padding: 10px 12px; cursor: pointer; color: var(--text); font-weight: 600; font-size: 14.5px; }
+  .module:hover { background: var(--tile-hover); }
+  .module svg { color: var(--navy); flex: none; margin-top: 1px; }
+  .module small { display: block; font-weight: 400; color: var(--muted); font-size: 12.5px; }
+
+  /* Petición / respuesta */
+  .row { display: flex; gap: 8px; margin-bottom: 8px; }
+  select, input, textarea { font: 13px ui-monospace, Consolas, monospace; background: var(--code-bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+  input { flex: 1; min-width: 0; }
+  textarea { width: 100%; min-height: 100px; resize: vertical; }
+  .btn { font: inherit; font-weight: 600; background: var(--navy); color: #fff; border: 0; border-radius: 8px; padding: 8px 16px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  .btn:hover { background: #26406f; }
+  pre { margin: 0; background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; overflow: auto; max-height: 460px; font: 12.5px/1.45 ui-monospace, Consolas, monospace; white-space: pre-wrap; word-break: break-word; }
+  .status { display: inline-block; font-weight: 600; font-size: 13px; border-radius: 999px; padding: 2px 10px; margin-bottom: 8px; background: var(--tile); color: var(--muted); }
+  .status.ok { background: #e3f4ea; color: var(--ok); } .status.err { background: #fde8e6; color: var(--err); }
+  .note { color: var(--muted); font-size: 13px; margin: 8px 0 0; }
+
+  .mail { border-top: 1px solid var(--border); padding: 10px 0; font-size: 13.5px; }
+  .mail:first-child { border-top: 0; padding-top: 0; }
+  .mail b { display: block; margin-bottom: 6px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="logo" id="logo"></div>
+    <div class="brand"><b>EduOrient CRM</b><span>Consola de demostración (local)</span></div>
+    <div class="top-actions">
+      <span class="session" id="who">Sin sesión</span>
+      <button class="icon-btn" id="bell" title="Ir al buzón de correo"></button>
+      <span class="icon-btn" id="usericon"></span>
+    </div>
+  </header>
+
+  <main class="content">
+    <h1>¡Bienvenido al sistema!</h1>
+    <p class="subtitle">Resumen general de orientación vocacional · datos de ejemplo en memoria, se reinician al detener el servidor</p>
+
+    <div class="stats">
+      <div class="stat"><span data-icon="users" style="color:var(--blue)"></span><div class="num" id="s-students">—</div><div class="lbl">Estudiantes registrados</div></div>
+      <div class="stat"><span data-icon="building" style="color:var(--green)"></span><div class="num" id="s-inst">—</div><div class="lbl">Instituciones</div></div>
+      <div class="stat"><span data-icon="calendarCheck" style="color:var(--purple)"></span><div class="num" id="s-pending">—</div><div class="lbl">Solicitudes de contacto pendientes</div></div>
+      <div class="stat"><span data-icon="cap" style="color:var(--orange)"></span><div class="num" id="s-programs">—</div><div class="lbl">Programas académicos</div></div>
+    </div>
+
+    <section class="card">
+      <h2>Entrar como</h2>
+      <div class="chips" id="roles"></div>
+    </section>
+
+    <section class="card">
+      <h2>Módulos principales <small id="role-hint"></small></h2>
+      <div class="modules" id="actions"></div>
+    </section>
+
+    <section class="card">
+      <h2>Petición</h2>
+      <div class="row">
+        <select id="method"><option>GET</option><option>POST</option><option>PATCH</option><option>DELETE</option></select>
+        <input id="path" value="/v1/health" aria-label="Ruta">
+        <button class="btn" id="send"><span data-icon="send"></span>Enviar</button>
+      </div>
+      <textarea id="body" spellcheck="false" placeholder="Cuerpo JSON (opcional)"></textarea>
+    </section>
+
+    <section class="card">
+      <h2>Respuesta</h2>
+      <div class="status" id="status">Sin enviar</div>
+      <pre id="out">Elige un rol y un módulo.</pre>
+      <p class="note" id="explain"></p>
+    </section>
+
+    <section class="card" id="mailbox-card">
+      <h2>Comunicaciones <small>buzón de correo simulado</small></h2>
+      <div id="mailbox"></div>
+    </section>
+  </main>
+</div>
+
+<script>
+const ICONS = {
+  users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  userPlus: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>',
+  building: '<rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01"/>',
+  calendarCheck: '<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/>',
+  cap: '<path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
+  compass: '<circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/>',
+  mail: '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-10 5L2 7"/>',
+  chart: '<path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/>',
+  shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
+  shieldOff: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 9 6 6M15 9l-6 6"/>',
+  search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5M12 15V3"/>',
+  megaphone: '<path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
+  activity: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  ban: '<circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/>',
+  check: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+  send: '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
+  bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+  userCircle: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.66V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.66"/>',
+};
+const svg = (name, size = 20) =>
+  `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
+
+const state = { token: null, role: null, key: null, candidateId: null, requestId: null };
+let accounts = {};
+
+const ACTIONS = {
+  PUBLIC: [
+    { icon: 'ban', label: 'Registrar menor de 13 años', note: 'COPPA: se rechaza sin guardar nada', method: 'POST', path: '/v1/auth/register/student',
+      body: { email: 'nino@demo.local', password: 'Password1234', firstName: 'Niño', lastName: 'Demo', birthDate: '2016-01-01', country: 'PR', region: 'PR-SJ', gradeLevel: 'HS_JUNIOR', interests: [], parentEmail: 'papa@demo.local', acceptTerms: true, acceptPrivacy: true, tosVersion: '2026-11-01' } },
+    { icon: 'userPlus', label: 'Registrar menor de 17 años', note: 'Se envían correos al estudiante y al tutor', method: 'POST', path: '/v1/auth/register/student',
+      body: { email: 'sofia@demo.local', password: 'Password1234', firstName: 'Sofía', lastName: 'Demo', birthDate: '2009-06-01', country: 'PR', region: 'PR-SJ', gradeLevel: 'HS_SENIOR', gpa: 3.7, interests: ['AREA_SCIENCE', 'INVESTIGATIVE'], parentEmail: 'tutor.sofia@demo.local', acceptTerms: true, acceptPrivacy: true, tosVersion: '2026-11-01' } },
+    { icon: 'activity', label: 'Estado del servicio', method: 'GET', path: '/v1/health' },
+  ],
+  STUDENT: [
+    { icon: 'shield', label: 'Mi consentimiento', method: 'GET', path: '/v1/students/me/consent' },
+    { icon: 'compass', label: 'Recomendaciones vocacionales', method: 'GET', path: '/v1/vocational/recommendations?limit=5' },
+    { icon: 'calendarCheck', label: 'Mis solicitudes de contacto', method: 'GET', path: '/v1/students/me/contact-requests', capture: 'request' },
+    { icon: 'check', label: 'Aceptar última solicitud', note: 'Falla si no activaste la transferencia', method: 'POST', path: '/v1/students/me/contact-requests/{requestId}/respond', body: { decision: 'ACCEPT' } },
+    { icon: 'shield', label: 'Activar transferencia a terceros', method: 'PATCH', path: '/v1/students/me/consent', body: { thirdPartyTransferConsent: true } },
+    { icon: 'shieldOff', label: 'Revocar transferencia a terceros', note: 'Anula todos los matches', method: 'PATCH', path: '/v1/students/me/consent', body: { thirdPartyTransferConsent: false } },
+    { icon: 'megaphone', label: 'Ver anuncios', method: 'GET', path: '/v1/ads/feed' },
+    { icon: 'mail', label: 'Pedir info desde anuncio', method: 'POST', path: '/v1/ads/ad_demo_1/request-info' },
+    { icon: 'download', label: 'Descargar mis datos', method: 'GET', path: '/v1/students/me/data' },
+  ],
+  UNIVERSITY: [
+    { icon: 'search', label: 'Buscar candidatos (todos)', note: 'Perfiles anonimizados', method: 'POST', path: '/v1/crm/search', body: {}, capture: 'candidate' },
+    { icon: 'search', label: 'Buscar solo tecnología', note: 'Menos de 5 resultados: se suprimen', method: 'POST', path: '/v1/crm/search', body: { interests: ['AREA_TECH'] } },
+    { icon: 'chart', label: 'Estadísticas agregadas', method: 'GET', path: '/v1/crm/insights' },
+    { icon: 'mail', label: 'Solicitar contacto (1.er candidato)', note: 'Primero ejecuta una búsqueda', method: 'POST', path: '/v1/crm/contact-requests', body: { candidateId: '{candidateId}', message: 'Te invitamos a nuestro Open House.' } },
+    { icon: 'calendarCheck', label: 'Ver mis solicitudes', note: 'El contacto solo aparece si el Privacy Guard lo permite', method: 'GET', path: '/v1/crm/contact-requests' },
+    { icon: 'download', label: 'Exportar contactos (CSV)', method: 'GET', path: '/v1/crm/contacts/export' },
+    { icon: 'megaphone', label: 'Estadísticas del anuncio', method: 'GET', path: '/v1/ads/campaigns/ad_demo_1/stats' },
+  ],
+  SCHOOL: [
+    { icon: 'chart', label: 'Estadísticas de mis estudiantes', note: 'Solo agregados', method: 'GET', path: '/v1/schools/me/insights' },
+    { icon: 'ban', label: 'Intentar usar el CRM', note: 'Debe dar 403', method: 'POST', path: '/v1/crm/search', body: {} },
+  ],
+  ADMIN: [
+    { icon: 'building', label: 'Alta de universidad', method: 'POST', path: '/v1/auth/organizations',
+      body: { type: 'UNIVERSITY', name: 'Universidad Nueva', country: 'PR', region: 'PR-PO', accountEmail: 'nueva@uni.demo', initialPassword: 'UniNueva12345' } },
+  ],
+};
+
+const ROLES = [
+  { key: null, role: 'PUBLIC', label: 'Sin sesión' },
+  { key: 'student', role: 'STUDENT', label: 'Ana (estudiante, 22)' },
+  { key: 'minor', role: 'STUDENT', label: 'Luis (menor, 17)' },
+  { key: 'university', role: 'UNIVERSITY', label: 'Universidad' },
+  { key: 'school', role: 'SCHOOL', label: 'Colegio' },
+  { key: 'admin', role: 'ADMIN', label: 'Administrador' },
+];
+const ROLE_NAMES = { PUBLIC: 'acciones públicas', STUDENT: 'estudiante', UNIVERSITY: 'universidad', SCHOOL: 'colegio', ADMIN: 'administrador' };
+
+const $ = (id) => document.getElementById(id);
+
+function renderRoles() {
+  $('roles').innerHTML = '';
+  for (const r of ROLES) {
+    const b = document.createElement('button');
+    b.className = 'chip';
+    b.textContent = r.label;
+    if ((state.role || 'PUBLIC') === r.role && state.key === r.key) b.classList.add('active');
+    b.onclick = () => loginAs(r);
+    $('roles').appendChild(b);
+  }
+}
+
+function renderActions() {
+  const role = state.role || 'PUBLIC';
+  $('role-hint').textContent = ROLE_NAMES[role];
+  $('actions').innerHTML = '';
+  for (const a of ACTIONS[role]) {
+    const b = document.createElement('button');
+    b.className = 'module';
+    b.innerHTML = `${svg(a.icon)}<span>${a.label}${a.note ? `<small>${a.note}</small>` : ''}</span>`;
+    b.onclick = () => runAction(a);
+    $('actions').appendChild(b);
+  }
+}
+
+async function loginAs(r) {
+  if (!r.key) {
+    Object.assign(state, { token: null, role: null, key: null });
+    $('who').textContent = 'Sin sesión';
+  } else {
+    const acc = accounts[r.key];
+    const res = await fetch('/v1/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: acc.email, password: acc.password }) });
+    const data = await res.json();
+    Object.assign(state, { token: data.accessToken, role: r.role, key: r.key });
+    $('who').textContent = acc.email;
+  }
+  renderRoles();
+  renderActions();
+}
+
+function fill(str) {
+  return str.replace('{candidateId}', state.candidateId || 'ejecuta-una-busqueda-primero').replace('{requestId}', state.requestId || 'sin-solicitud');
+}
+
+function runAction(a) {
+  $('method').value = a.method;
+  $('path').value = fill(a.path);
+  $('body').value = a.body ? fill(JSON.stringify(a.body, null, 2)) : '';
+  $('explain').textContent = a.note || '';
+  send(a.capture);
+}
+
+async function send(capture) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (state.token) headers.Authorization = `Bearer ${state.token}`;
+  const method = $('method').value;
+  const opts = { method, headers };
+  if (method !== 'GET' && $('body').value.trim()) opts.body = $('body').value;
+  const res = await fetch($('path').value, opts);
+  const text = await res.text();
+  let pretty = text;
+  try {
+    const json = JSON.parse(text);
+    pretty = JSON.stringify(json, null, 2);
+    if (capture === 'candidate' && json.results?.length) state.candidateId = json.results[0].candidateId;
+    if (capture === 'request' && Array.isArray(json)) {
+      const pending = json.find((r) => r.status === 'PENDING');
+      if (pending) state.requestId = pending.id;
+    }
+  } catch {}
+  $('status').textContent = `${res.status} ${res.statusText}`;
+  $('status').className = 'status ' + (res.ok ? 'ok' : 'err');
+  $('out').textContent = pretty || '(sin contenido)';
+  loadMailbox();
+  loadStats();
+}
+
+async function loadStats() {
+  try {
+    const s = await (await fetch('/dev/stats')).json();
+    $('s-students').textContent = s.students;
+    $('s-inst').textContent = s.institutions;
+    $('s-pending').textContent = s.pendingRequests;
+    $('s-programs').textContent = s.programs;
+  } catch {}
+}
+
+async function loadMailbox() {
+  const mails = await (await fetch('/dev/mailbox')).json();
+  $('mailbox').innerHTML = mails.length ? '' : '<p class="note">Sin correos.</p>';
+  for (const m of mails.slice(0, 8)) {
+    const div = document.createElement('div');
+    div.className = 'mail';
+    const b = document.createElement('b');
+    b.textContent = `Para: ${m.to} — ${m.subject}`;
+    const p = document.createElement('pre');
+    p.textContent = m.text;
+    div.append(b, p);
+    $('mailbox').appendChild(div);
+  }
+}
+
+// Iconos estáticos
+$('logo').innerHTML = svg('cap', 26);
+$('bell').innerHTML = svg('bell', 22);
+$('usericon').innerHTML = svg('userCircle', 24);
+document.querySelectorAll('[data-icon]').forEach((el) => { el.innerHTML = svg(el.dataset.icon, el.closest('.btn') ? 16 : 24); });
+$('bell').onclick = () => $('mailbox-card').scrollIntoView({ behavior: 'smooth' });
+$('send').onclick = () => send();
+
+(async () => {
+  accounts = await (await fetch('/dev/demo-accounts')).json();
+  renderRoles();
+  renderActions();
+  loadMailbox();
+  loadStats();
+})();
+</script>
+</body>
+</html>

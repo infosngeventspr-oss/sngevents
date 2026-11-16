@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "echo \"Sin build: Vercel compila api/index.ts\"",
+  "functions": {
+    "api/index.ts": {
+      "includeFiles": "scripts/dev-console.html",
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [{ "source": "/(.*)", "destination": "/api" }]
+}
